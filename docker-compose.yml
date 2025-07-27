@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  data_generator:
+    build:
+      context: ./services/data_generator
+    env_file: .env
+    environment:
+      - OPENAI_MODEL=gpt-4o-mini
+    command: ["python", "cli.py", "-n", "1", "-o", "/opt/output"]
+    volumes:
+      - ./data/raw:/opt/output
+  classifier_service:
+    build:
+      context: ./services/classifier_service
+    ports: ["8001:8000"] # external:internal
+    volumes:
+      - ./services/classifier_service/onnx_model:/opt/app/onnx_model:ro
+    depends_on:
+      - data_generator
